@@ -56,16 +56,19 @@ public class CameraSeeThrough : MonoBehaviour {
     {
         float lerpTime = 0f;
         SpriteRenderer spriteRenderer = go.GetComponent<SpriteRenderer>();
-        Color originalColor = spriteRenderer.color;
-        Color targetColor = spriteRenderer.color;
+        Color originalColor = spriteRenderer.material.color;
+        Color targetColor = spriteRenderer.material.color;
         targetColor.a = targetOpacity;
 
         while (lerpTime <= fadeTime)
         {
-            spriteRenderer.color = Color.Lerp(originalColor, targetColor, lerpTime / fadeTime);
+            spriteRenderer.material.color = Color.Lerp(originalColor, targetColor, lerpTime / fadeTime);
             lerpTime += Time.deltaTime;
             yield return null;
         }
+
+        // Make sure opacity on tree goes all the way to 1 otherwise shadow has weird artifacts
+        spriteRenderer.material.color = targetColor;
     }
 
 }

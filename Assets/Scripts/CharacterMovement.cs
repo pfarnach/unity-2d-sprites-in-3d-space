@@ -15,8 +15,10 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField]
     private float skinWidth = 0.1f;
 
+
     private BoxCollider boxCollider;
-    private SpriteRenderer spriteRenderer;
+    //private SpriteRenderer spriteRenderer;
+    private Animator anim;
     private bool isFlipped = false;
 
 
@@ -24,7 +26,8 @@ public class CharacterMovement : MonoBehaviour
     {
         //body = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        //spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
     }
 
     void Update()
@@ -35,7 +38,15 @@ public class CharacterMovement : MonoBehaviour
     void Move ()
     {
         // Adapted from https://www.reddit.com/r/Unity2D/comments/2f497k/zeldafinalfantasy_like_top_down_movement/
-        Vector3 dir = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical")).normalized * moveSpeed * Time.deltaTime;
+        Vector3 dir = new Vector3(
+            Input.GetAxisRaw("Horizontal"), 
+            0f, 
+            Input.GetAxisRaw("Vertical")
+        ).normalized * moveSpeed * Time.deltaTime;
+
+        // Set animation
+        anim.SetBool("isWalking", dir != Vector3.zero);
+
         DoFlip(dir);
         DoMove(dir);
     }
@@ -68,7 +79,7 @@ public class CharacterMovement : MonoBehaviour
         Physics.BoxCast(
             boxCollider.bounds.center,
             (boxCollider.size / 2) - (Vector3.one * skinWidth),
-            Vector3.forward * Mathf.Sign(dir.z),
+            transform.forward * Mathf.Sign(dir.z),
             out hit,
             Quaternion.identity,
             skinWidth * 2,
@@ -77,21 +88,25 @@ public class CharacterMovement : MonoBehaviour
 
         if (hit.collider == null)
             transform.Translate(0, 0, dir.z);
+        else
+            Debug.Log(hit.collider.name);
 
 
         // Horizontal movement
         Physics.BoxCast(
             boxCollider.bounds.center,
             (boxCollider.size / 2) - (Vector3.one * skinWidth),
-            Vector3.right * Mathf.Sign(dir.x),
+            transform.right * Mathf.Sign(dir.x),
             out hit,
             Quaternion.identity,
             skinWidth * 2,
             collisionMask
         );
 
+        Debug.DrawRay(transform.position,transform.right,Color.red);
+
         if (hit.collider == null)
-            transform.Translate(dir.x, 0, 0); 
+            transform.Translate(dir.x, 0, 0);
     }
 
 }
